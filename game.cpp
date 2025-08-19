@@ -1,6 +1,8 @@
 #include <SFML/Graphics.hpp>
+#include <cstdlib>
+#include <ctime>
+#include <iostream>
 using namespace sf;
-
 int main() {
   
     // Tạo nền :>>
@@ -25,27 +27,24 @@ int main() {
         return -1; // nếu không tải được, trả về -1 để kết thúc chương trình
     }
     // Khởi tạo các biến cho ống
-    int goundHeight = 100; // chiều cao của mặt đất, có thể thay đổi để phù hợp với hình nền
-    int pipeX= 400; // vị trí ống theo trục X, có thể thay đổi để di chuyển ống
-    int pipeY = 0; // vị trí ống theo trục Y, sẽ được tính toán dựa trên khoảng cách giữa ống trên và ống dưới
-    int pipeTopY = -50; // vị trí ống trên, có thể thay đổi để tạo độ khó
-    int khoangcach=150; // sẽ là khoảng cách giữa ống trên và ống dưới, có thể thay đổi để tạo độ khó
-    int gap = khoangcach; // dùng biến tạm sao chép khoảng cách giữa ống trên và ống dưới
-    int pipeHeight = pipeTexture.getSize().y; // lấy chiều cao của ống từ texture
-    int pipeWidth = pipeTexture.getSize().x; // lấy chiều rộng của ống từ texture
-
-    // Ống trên
+    int groundHeight = 100; // chiều cao của đất
+    int pipeX = 400; // vị trí x của ống
+    int gapY = 300; // vị trí y của khoảng cách giữa ống trên và ống dưới
+    int khoangcach=150; // khoảng cách giữa ống trên và ống dưới
+    int pipeHeight = pipeTexture.getSize().y; // chiều cao của ống từ texture
+    int pipeWidth = pipeTexture.getSize().x; // chiều rộng của ống từ texture
+    
+    // Tạo ống trên :>>
     Sprite pipeTop(pipeTexture); // tạo sprite từ texture ống
-    //pipeTop.setPosition(400, 300); // vị trí của ống trên cùng, mặc dù vẽ ống trên cùng nhưng chả hiểu sao nó lại là cái ống bển dưới =))
-    pipeTop.setOrigin(pipeWidth / 2, 0); // đặt gốc của ống trên tại giữa cạnh trên của nó
-    pipeTop.setPosition(pipeX,pipeTopY); // vị trí của ống trên, nó sẽ nằm ở trên cùng của cửa sổ
-    // ống dưới sẽ được tạo bằng cách lật ngược ống trên
-    Sprite pipeBottom(pipeTexture); // tạo sprite từ texture ống
-    pipeBottom.setOrigin(pipeWidth / 2, pipeHeight); // đặt gốc của ống dưới tại giữa cạnh dưới của nó
-    //pipeBottom.setPosition(400, 600); // vị trí của ống dưới, nó lại là cái ống bển trên =))
-    pipeBottom.setRotation(180); // lật ngược ống dưới
-    pipeBottom.setPosition(pipeX, pipeHeight + gap + pipeTopY - 100); // vị trí của ống dưới, nó sẽ nằm ở dưới ống trên với khoảng cách đã định
+    pipeTop.setOrigin(pipeWidth / 2, 0); // gốc giữa cạnh trên
+    pipeTop.setRotation(180); // xoay ống trên 180 độ để hiển thị đúng
+    pipeTop.setPosition(pipeX, gapY); // vị trí ống trên
 
+    // Tạo ống dưới :>>
+    Sprite pipeBottom(pipeTexture); // tạo sprite từ texture ống
+    pipeBottom.setOrigin(pipeWidth / 2, 0); // gốc giữa cạnh dưới
+    //pipeBottom.setRotation(180); // xoay ống dưới 180 độ để hiển thị đúng
+    pipeBottom.setPosition(pipeX, gapY + khoangcach ); // vị trí ống dưới, cách ống trên một khoảng cách nhất định
 
     // Tạo chim :>>
     //CircleShape bird(20); // bán kính 20 pixel
@@ -60,12 +59,32 @@ int main() {
     bird.setPosition(100, 300); // vị trí ban đầu của chim
     
     
+    // Tốc độ của ống :>> 
+    float pipeSpeed = 0.3f;
+    
+    
     while (window.isOpen()) { // vòng lặp chính của chương trình, chương trình sẽ chạy mãi mãi để cửa sổ tồn tại vĩnh viễn
         Event event; // biến event để lưu trữ các sự kiện xảy ra trong cửa sổ
         while (window.pollEvent(event)) { // kiểm tra các sự kiện xảy ra trong cửa sổ
             if (event.type == Event::Closed) { // nếu sự kiện là cửa sổ bị đóng
                 window.close(); // đóng cửa sổ
             }
+        }
+
+        // Di chuyển ống sang trái
+        pipeTop.move(-pipeSpeed, 0); // di chuyển ống trên sang trái
+        pipeBottom.move(-pipeSpeed, 0); // di chuyển ống dưới sang trái
+        if (pipeTop.getPosition().x < -pipeWidth) { // nếu ống trên ra ngoài cửa sổ
+            
+            int minGapY = 100; // khoảng cách tối thiểu giữa ống trên và ống dưới
+            int maxGapY = bgSize.y - groundHeight - khoangcach - 100;  // khoảng cách tối đa giữa ống trên và ống dưới
+            int gapY = minGapY + rand() % (maxGapY - minGapY + 1);  // tạo khoảng cách ngẫu nhiên giữa ống trên và ống dưới
+
+            pipeTop.setPosition(bgSize.x + pipeWidth / 2, gapY); // vị trí ống trên
+            pipeBottom.setPosition(bgSize.x + pipeWidth / 2, gapY + khoangcach); // vị trí ống dưới, cách ống trên một khoảng cách nhất định
+        
+        
+        
         }
         // thứ tự các lệnh vẽ phải đúng thứ tự để hiển thị đúng
         window.clear(Color::Cyan); // vẽ nền xanh cho cửa sổ
