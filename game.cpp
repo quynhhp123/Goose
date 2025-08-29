@@ -14,8 +14,10 @@ int main() {
     // Tạo cửa sổ :>>
     // Lấy kích thước ảnh nền để khớp với kích thước cửa sổ
     Vector2u bgSize = backgroundTexture.getSize();
-    RenderWindow window(VideoMode(bgSize.x,bgSize.y),"flaby brird"); // tạo khung cửa sổ và tiêu đề bên trên cửa sổ
-    
+    RenderWindow window(VideoMode(bgSize.x,bgSize.y),"flaby brird"); // tạo khung cửa sổ và tiêu đề bên  cửa sổ
+    window.setFramerateLimit(120);
+
+
 
     Sprite background (backgroundTexture); // tạo sprite từ texture nền
     
@@ -29,22 +31,22 @@ int main() {
     // Khởi tạo các biến cho ống
     int groundHeight = 100; // chiều cao của đất
     int pipeX = 400; // vị trí x của ống
-    int gapY = 300; // vị trí y của khoảng cách giữa ống trên và ống dưới
-    int khoangcach=150; // khoảng cách giữa ống trên và ống dưới
+    int gapY = 300; // vị trí y của khoảng cách giữa ống   và ống dưới
+    int khoangcach=150; // khoảng cách giữa ống   và ống dưới
     int pipeHeight = pipeTexture.getSize().y; // chiều cao của ống từ texture
     int pipeWidth = pipeTexture.getSize().x; // chiều rộng của ống từ texture
     
-    // Tạo ống trên :>>
+    // Tạo ống   :>>
     Sprite pipeTop(pipeTexture); // tạo sprite từ texture ống
-    pipeTop.setOrigin(pipeWidth / 2, 0); // gốc giữa cạnh trên
-    pipeTop.setRotation(180); // xoay ống trên 180 độ để hiển thị đúng
-    pipeTop.setPosition(pipeX, gapY); // vị trí ống trên
+    pipeTop.setOrigin(pipeWidth / 2, 0); // gốc giữa cạnh  
+    pipeTop.setRotation(180); // xoay ống   180 độ để hiển thị đúng
+    pipeTop.setPosition(pipeX, gapY); // vị trí ống  
 
     // Tạo ống dưới :>>
     Sprite pipeBottom(pipeTexture); // tạo sprite từ texture ống
     pipeBottom.setOrigin(pipeWidth / 2, 0); // gốc giữa cạnh dưới
     //pipeBottom.setRotation(180); // xoay ống dưới 180 độ để hiển thị đúng
-    pipeBottom.setPosition(pipeX, gapY + khoangcach ); // vị trí ống dưới, cách ống trên một khoảng cách nhất định
+    pipeBottom.setPosition(pipeX, gapY + khoangcach ); // vị trí ống dưới, cách ống   một khoảng cách nhất định
 
     // Tạo chim :>>
     //CircleShape bird(20); // bán kính 20 pixel
@@ -59,37 +61,63 @@ int main() {
     bird.setPosition(100, 300); // vị trí ban đầu của chim
     
     
+    //Khởi tạo cho di chuyển của ống 
     // Tốc độ của ống :>> 
-    float pipeSpeed = 0.3f;
+    float pipeSpeed = 2.0f;
     
-    
+    // Khởi tạo cho di chuyển của chim
+    float birdSpeed = 0.0f; // vận tốc ban đầu của chim
+    float gravity = 0.25f; // trọng lực tác động lên chim
+    float jumpStrength = -6.5f; // sức mạnh nhảy của chim
+
+
+
     while (window.isOpen()) { // vòng lặp chính của chương trình, chương trình sẽ chạy mãi mãi để cửa sổ tồn tại vĩnh viễn
         Event event; // biến event để lưu trữ các sự kiện xảy ra trong cửa sổ
         while (window.pollEvent(event)) { // kiểm tra các sự kiện xảy ra trong cửa sổ
             if (event.type == Event::Closed) { // nếu sự kiện là cửa sổ bị đóng
                 window.close(); // đóng cửa sổ
             }
+            if (event.type == Event::KeyPressed && event.key.code == Keyboard::Space) { // nếu sự kiện là phím Space được nhấn
+                birdSpeed = jumpStrength; // đặt vận tốc của chim bằng sức mạnh nhảy
+            }
         }
 
+        // Chim chịu tác dộng của trọng lực
+        if (bird.getPosition().y < bgSize.y - groundHeight - birdTexture.getSize().y) {
+        birdSpeed += gravity;
+        }
+        bird.move(0, birdSpeed); // di chuyển chim theo vận tốc hiện tại
+        
+        if (bird.getPosition().y<0){
+            bird.setPosition(bird.getPosition().x, 0); // nếu chim bay lên quá cao, đặt lại vị trí chim ở   cùng
+        }
+        if (bird.getPosition().y > bgSize.y - groundHeight - birdTexture.getSize().y) { // nếu chim rơi xuống đất
+            bird.setPosition(bird.getPosition().x, bgSize.y - groundHeight - birdTexture.getSize().y); // đặt lại vị trí chim ở   đất
+            //birdSpeed = 0; // đặt vận tốc của chim về 0
+        }
+        
+        
         // Di chuyển ống sang trái
-        pipeTop.move(-pipeSpeed, 0); // di chuyển ống trên sang trái
+        pipeTop.move(-pipeSpeed, 0); // di chuyển ống   sang trái
         pipeBottom.move(-pipeSpeed, 0); // di chuyển ống dưới sang trái
-        if (pipeTop.getPosition().x < -pipeWidth) { // nếu ống trên ra ngoài cửa sổ
+        if (pipeTop.getPosition().x < -pipeWidth) { // nếu ống   ra ngoài cửa sổ
             
-            int minGapY = 100; // khoảng cách tối thiểu giữa ống trên và ống dưới
-            int maxGapY = bgSize.y - groundHeight - khoangcach - 100;  // khoảng cách tối đa giữa ống trên và ống dưới
-            int gapY = minGapY + rand() % (maxGapY - minGapY + 1);  // tạo khoảng cách ngẫu nhiên giữa ống trên và ống dưới
+            int minGapY = 100; // khoảng cách tối thiểu giữa ống   và ống dưới
+            int maxGapY = bgSize.y - groundHeight - khoangcach - 100;  // khoảng cách tối đa giữa ống   và ống dưới
+            int gapY = minGapY + rand() % (maxGapY - minGapY + 1);  // tạo khoảng cách ngẫu nhiên giữa ống   và ống dưới
 
-            pipeTop.setPosition(bgSize.x + pipeWidth / 2, gapY); // vị trí ống trên
-            pipeBottom.setPosition(bgSize.x + pipeWidth / 2, gapY + khoangcach); // vị trí ống dưới, cách ống trên một khoảng cách nhất định
+            pipeTop.setPosition(bgSize.x + pipeWidth / 2, gapY); // vị trí ống  
+            pipeBottom.setPosition(bgSize.x + pipeWidth / 2, gapY + khoangcach); // vị trí ống dưới, cách ống   một khoảng cách nhất định
         
         
         
         }
+        
         // thứ tự các lệnh vẽ phải đúng thứ tự để hiển thị đúng
         window.clear(Color::Cyan); // vẽ nền xanh cho cửa sổ
         window.draw(background); // vẽ nền
-        window.draw(pipeTop); // vẽ ống trên      ngược lại cũng được vẽ ống dưới trước, ống trên thoải mái không ảnh hưởng đến phần hiển thị
+        window.draw(pipeTop); // vẽ ống        ngược lại cũng được vẽ ống dưới trước, ống   thoải mái không ảnh hưởng đến phần hiển thị
         window.draw(pipeBottom); // vẽ ống dưới
         window.draw(bird);         // vẽ chim :>>
         window.display(); // hiển thị cửa sổ
