@@ -48,6 +48,25 @@ int main() {
     //pipeBottom.setRotation(180); // xoay ống dưới 180 độ để hiển thị đúng
     pipeBottom.setPosition(pipeX, gapY + khoangcach ); // vị trí ống dưới, cách ống   một khoảng cách nhất định
 
+
+
+    // Tạo đất 
+    Texture groundTexture; // tạo texture cho đất
+    if (!groundTexture.loadFromFile("dat.png")) { // tải hình ảnh đất từ file
+        return -1; // nếu không tải được, trả về -1 để kết thúc chương trình
+    }
+    int groundWidth = groundTexture.getSize().x; // chiều rộng của đất từ texture
+    int groundY = bgSize.y - groundHeight; // vị trí y của đất
+
+
+    const int numGround = bgSize.x / groundWidth + 4; // +3 để tránh hở
+    Sprite groundSprites[numGround];
+    for (int i = 0; i < numGround; ++i) {
+        groundSprites[i].setTexture(groundTexture);
+        groundSprites[i].setPosition(i * groundWidth, groundY);
+    }
+
+
     // Tạo chim :>>
     //CircleShape bird(20); // bán kính 20 pixel
     //bird.setFillColor(Color::Yellow); // màu vàng cho chim
@@ -64,6 +83,8 @@ int main() {
     //Khởi tạo cho di chuyển của ống 
     // Tốc độ của ống :>> 
     float pipeSpeed = 2.0f;
+    // Tốc độ của đất :>>
+    float groundSpeed = 10.f; // tốc độ di chuyển của đất, bằng với tốc độ di chuyển của ống để tạo hiệu ứng liền mạch
     
     // Khởi tạo cho di chuyển của chim
     float birdSpeed = 0.0f; // vận tốc ban đầu của chim
@@ -82,6 +103,21 @@ int main() {
                 birdSpeed = jumpStrength; // đặt vận tốc của chim bằng sức mạnh nhảy
             }
         }
+
+            for (int i = 0; i < numGround; ++i) {
+            groundSprites[i].move(-groundSpeed, 0);
+            // Nếu sprite đất ra khỏi màn hình trái, chuyển về bên phải
+            if (groundSprites[i].getPosition().x <= -groundWidth) {
+                // Tìm sprite đất ở xa nhất bên phải
+                float maxX = 0;
+                for (int j = 0; j < numGround; ++j)
+                    if (groundSprites[j].getPosition().x > maxX)
+                        maxX = groundSprites[j].getPosition().x;
+                groundSprites[i].setPosition(maxX + groundWidth, groundY);
+                 }
+             }
+
+        
 
         // Chim chịu tác dộng của trọng lực
         if (bird.getPosition().y < bgSize.y - groundHeight - birdTexture.getSize().y) {
@@ -119,6 +155,8 @@ int main() {
         window.draw(background); // vẽ nền
         window.draw(pipeTop); // vẽ ống        ngược lại cũng được vẽ ống dưới trước, ống   thoải mái không ảnh hưởng đến phần hiển thị
         window.draw(pipeBottom); // vẽ ống dưới
+        for (int i = 0; i < numGround; ++i)
+        window.draw(groundSprites[i]);
         window.draw(bird);         // vẽ chim :>>
         window.display(); // hiển thị cửa sổ
     }
