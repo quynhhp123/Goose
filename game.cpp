@@ -74,17 +74,25 @@ int main() {
     if (!birdTexture.loadFromFile("chim.png")) { // tải hình ảnh chim từ file
         return -1; // nếu không tải được, trả về -1 để kết thúc chương trình
     }
-    
-    
+    const int birdFrame=3; // số khung hình của chim trong ảnh
+    int birdFrameWidth=birdTexture.getSize().x/birdFrame; // chiều rộng của mỗi khung hình chim 
+    int birdFrameHeight=birdTexture.getSize().y; // chiều cao của chim
+    birdTexture.setSmooth(true); // làm mịn texture chim    
     Sprite bird(birdTexture); // tạo sprite từ texture chim
     bird.setPosition(100, 300); // vị trí ban đầu của chim
     
+    //animation chim :>>
+    int  currentFrame=0; // khung hình hiện tại
+    float frameDuration=0.15f; // thời gian mỗi khung hình hiển thị
+    float elapsedTime=0.0f; // thời gian đã trôi qua
+    Clock clock; // đồng hồ để đo thời gian
+
     
     //Khởi tạo cho di chuyển của ống 
     // Tốc độ của ống :>> 
     float pipeSpeed = 2.0f;
     // Tốc độ của đất :>>
-    float groundSpeed = 10.f; // tốc độ di chuyển của đất, bằng với tốc độ di chuyển của ống để tạo hiệu ứng liền mạch
+    float groundSpeed = 2.f; // tốc độ di chuyển của đất, bằng với tốc độ di chuyển của ống để tạo hiệu ứng liền mạch
     
     // Khởi tạo cho di chuyển của chim
     float birdSpeed = 0.0f; // vận tốc ban đầu của chim
@@ -113,10 +121,16 @@ int main() {
                 for (int j = 0; j < numGround; ++j)
                     if (groundSprites[j].getPosition().x > maxX)
                         maxX = groundSprites[j].getPosition().x;
-                groundSprites[i].setPosition(maxX + groundWidth, groundY);
+                groundSprites[i].setPosition(maxX + groundWidth-3, groundY);
                  }
              }
 
+        elapsedTime += clock.restart().asSeconds();
+        if (elapsedTime >= frameDuration) {
+        elapsedTime = 0.0f;
+        currentFrame = (currentFrame + 1) % birdFrame;
+        bird.setTextureRect(IntRect(currentFrame * birdFrameWidth, 0, birdFrameWidth, birdFrameHeight));
+        }
         
 
         // Chim chịu tác dộng của trọng lực
