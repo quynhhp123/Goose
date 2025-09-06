@@ -32,7 +32,7 @@ int main() {
     int groundHeight = 100; // chiều cao của đất
     int pipeX = 400; // vị trí x của ống
     int gapY = 300; // vị trí y của khoảng cách giữa ống   và ống dưới
-    int khoangcach=150; // khoảng cách giữa ống   và ống dưới
+    int khoangcach=200; // khoảng cách giữa ống   và ống dưới
     int pipeHeight = pipeTexture.getSize().y; // chiều cao của ống từ texture
     int pipeWidth = pipeTexture.getSize().x; // chiều rộng của ống từ texture
     
@@ -142,10 +142,24 @@ int main() {
         if (bird.getPosition().y<0){
             bird.setPosition(bird.getPosition().x, 0); // nếu chim bay lên quá cao, đặt lại vị trí chim ở   cùng
         }
-        if (bird.getPosition().y > bgSize.y - groundHeight - birdTexture.getSize().y) { // nếu chim rơi xuống đất
-            bird.setPosition(bird.getPosition().x, bgSize.y - groundHeight - birdTexture.getSize().y); // đặt lại vị trí chim ở   đất
-            //birdSpeed = 0; // đặt vận tốc của chim về 0
+        if (bird.getPosition().y >= bgSize.y - groundHeight - birdFrameHeight) {
+         bird.setPosition(bird.getPosition().x, bgSize.y - groundHeight - birdFrameHeight);
+         std::cout << "Game Over! Chim da cham dat.\n";
+         window.close(); // hoặc có thể reset lại game thay vì đóng
         }
+
+        // Va chạm với ống trên
+        if (bird.getGlobalBounds().intersects(pipeTop.getGlobalBounds())) {
+        std::cout << "Game Over! Chim da cham ong tren.\n";
+        window.close();
+        }
+
+        // Va chạm với ống dưới
+        if (bird.getGlobalBounds().intersects(pipeBottom.getGlobalBounds())) {
+        std::cout << "Game Over! Chim da cham ong duoi.\n";
+        window.close();
+        }
+
         
         
         // Di chuyển ống sang trái
