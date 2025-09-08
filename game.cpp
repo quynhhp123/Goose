@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace sf;
 int main() {
-  
+///////////////////////////////////////////////////////////////////SETUP/////////////////////////////////////////////////////////////////
     // Tạo nền :>>
     Texture backgroundTexture; // tạo texture cho nền
     if(!backgroundTexture.loadFromFile("nen.png")) { // tải hình ảnh nền từ file
@@ -21,7 +21,6 @@ int main() {
 
     Sprite background (backgroundTexture); // tạo sprite từ texture nền
     
-    /*==========================================================================*/
     
     // Tạo ống :>>
     Texture pipeTexture; // tạo texture cho ống
@@ -59,11 +58,11 @@ int main() {
     int groundY = bgSize.y - groundHeight; // vị trí y của đất
 
 
-    const int numGround = bgSize.x / groundWidth + 4; // +3 để tránh hở
-    Sprite groundSprites[numGround];
-    for (int i = 0; i < numGround; ++i) {
-        groundSprites[i].setTexture(groundTexture);
-        groundSprites[i].setPosition(i * groundWidth, groundY);
+    const int numGround = bgSize.x / groundWidth + 4; // +4 để tránh hở
+    Sprite groundSprites[numGround]; // mảng sprite đất
+    for (int i = 0; i < numGround; ++i) { // khởi tạo các sprite đất
+        groundSprites[i].setTexture(groundTexture); // gán texture cho sprite đất
+        groundSprites[i].setPosition(i * groundWidth, groundY); // vị trí sprite đất
     }
 
 
@@ -80,7 +79,8 @@ int main() {
     birdTexture.setSmooth(true); // làm mịn texture chim    
     Sprite bird(birdTexture); // tạo sprite từ texture chim
     bird.setPosition(100, 300); // vị trí ban đầu của chim
-    
+    // Set frame đầu tiên (frame 0)
+    bird.setTextureRect(IntRect(0, 0, birdFrameWidth, birdFrameHeight));
     //animation chim :>>
     int  currentFrame=0; // khung hình hiện tại
     float frameDuration=0.15f; // thời gian mỗi khung hình hiển thị
@@ -98,8 +98,27 @@ int main() {
     float birdSpeed = 0.0f; // vận tốc ban đầu của chim
     float gravity = 0.25f; // trọng lực tác động lên chim
     float jumpStrength = -6.5f; // sức mạnh nhảy của chim
+    // Thêm ngay sau khi tạo window
+    int score = 0;
+    Font font;
+    if (!font.loadFromFile("PressStart2P-Regular.ttf")) { // font để tính điểm
+        return -1;
+    }
+    Text scoreText;
+    scoreText.setFont(font);
+    scoreText.setCharacterSize(40);
+    scoreText.setFillColor(Color::White);
+    scoreText.setOutlineColor(Color::Black);   // viền đen
+    scoreText.setOutlineThickness(4);          // viền dày 4px
+    scoreText.setPosition(20, 20);
+    scoreText.setString("0");
+    
 
+    bool scored = false; // cờ đánh dấu đã cộng điểm qua 1 ống  
 
+////////////////////////////////////////////////////////////////// END SETUP /////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////// MAIN LOOP //////////////////////////////////////////////////////////////
 
     while (window.isOpen()) { // vòng lặp chính của chương trình, chương trình sẽ chạy mãi mãi để cửa sổ tồn tại vĩnh viễn
         Event event; // biến event để lưu trữ các sự kiện xảy ra trong cửa sổ
@@ -140,7 +159,7 @@ int main() {
         bird.move(0, birdSpeed); // di chuyển chim theo vận tốc hiện tại
         
         if (bird.getPosition().y<0){
-            bird.setPosition(bird.getPosition().x, 0); // nếu chim bay lên quá cao, đặt lại vị trí chim ở   cùng
+            bird.setPosition(bird.getPosition().x, 0); // nếu chim bay lên quá cao, đặt lại vị trí chim ở cùng y = 0
         }
         if (bird.getPosition().y >= bgSize.y - groundHeight - birdFrameHeight) {
          bird.setPosition(bird.getPosition().x, bgSize.y - groundHeight - birdFrameHeight);
@@ -175,7 +194,13 @@ int main() {
             pipeBottom.setPosition(bgSize.x + pipeWidth / 2, gapY + khoangcach); // vị trí ống dưới, cách ống   một khoảng cách nhất định
         
         
-        
+           scored = false; // reset lại để cặp ống mới có thể tính điểm
+        }
+         if (!scored && bird.getPosition().x > pipeTop.getPosition().x + pipeWidth/2) {
+            score++;
+            scored = true;
+            scoreText.setString(std::to_string(score));
+            std::cout << "Score: " << score << "\n";
         }
         
         // thứ tự các lệnh vẽ phải đúng thứ tự để hiển thị đúng
@@ -186,7 +211,9 @@ int main() {
         for (int i = 0; i < numGround; ++i)
         window.draw(groundSprites[i]);
         window.draw(bird);         // vẽ chim :>>
+        window.draw(scoreText); // vẽ điểm số
         window.display(); // hiển thị cửa sổ
     }
+    /////////////////////////////////////////////////////////////////// END MAIN LOOP /////////////////////////////////////////////////////////////
     return 0; // trả về 0 để kết thúc chương trình
 }
