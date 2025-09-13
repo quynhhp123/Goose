@@ -30,11 +30,11 @@ int main() {
     }
     // Khởi tạo các biến cho ống
     int groundHeight = 100; // chiều cao của đất
-    int pipeX = 400; // vị trí x của ống
     int gapY = 300; // vị trí y của khoảng cách giữa ống trên và ống dưới
     int khoangcach=300; // khoảng cách giữa ống trên và ống dưới là 500
     int pipeHeight = pipeTexture.getSize().y; // chiều cao của ống từ texture
     int pipeWidth = pipeTexture.getSize().x; // chiều rộng của ống từ texture
+    int pipeX = bgSize.x + pipeWidth / 2; // vị trí x của ống
     
     // Tạo ống trên :>>
     Sprite pipeTop(pipeTexture); // tạo sprite từ texture ống
