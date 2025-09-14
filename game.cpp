@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
@@ -279,14 +280,24 @@ int main() {
     titleSprite.setPosition(bgSize.x/2 - titleBounds.width/2-20,-300);
     
     // Tạo text bắt đầu vào game
-    Text startText;
-    startText.setFont(font);
-    startText.setCharacterSize(40);
-    startText.setFillColor(Color::White);
-    startText.setOutlineColor(Color::Black);
-    startText.setOutlineThickness(3);
-    startText.setString("Press SPACE to Start");
-    startText.setPosition(bgSize.x/2 - startText.getLocalBounds().width/2, bgSize.y/2 - 50);
+    // Text startText;
+    // startText.setFont(font);
+    // startText.setCharacterSize(40);
+    // startText.setFillColor(Color::White);
+    // startText.setOutlineColor(Color::Black);
+    // startText.setOutlineThickness(3);
+    // startText.setString("Press SPACE to Start");
+    // startText.setPosition(bgSize.x/2 - startText.getLocalBounds().width/2, bgSize.y/2 - 50);
+
+    Texture startTexture;
+    if (!startTexture.loadFromFile("xuatphatgame.png")) { // load hình ảnh nút bắt đầu
+        std::cout << "Khong the load start.png\n";
+        return -1;
+    }
+    Sprite startSprite(startTexture); // tạo sprite từ texture nút bắt đầu 
+    startSprite.setScale(1.f, 1.f); // đặt tỉ lệ cho nút bắt đầu
+    FloatRect startBounds = startSprite.getGlobalBounds(); // lấy kích thước của nút bắt đầu
+    startSprite.setPosition(bgSize.x/2 - startBounds.width/2, bgSize.y/2 - 150); // đặt vị trí nút bắt đầu ở giữa
 
     // Tạo text Game Over (thay vì load hình)
     Texture gameOverTexture;
@@ -352,8 +363,41 @@ int main() {
     float birdStartY = 300;      // vị trí Y ban đầu của chim
     Clock idleClock;
 
-    //SCORE
+    //////////////////////////////////////////////////////SOUND//////////////////////////////////////////////////////
+    // Nhạc nền (chạy xuyên suốt game)
+    Music backgroundMusic;
+    if (!backgroundMusic.openFromFile("wind.mp3")) {
+    std::cout << "Khong the load wind.mp3\n";
+    return -1;
+    }
+    backgroundMusic.setLoop(true);
+    backgroundMusic.play();
+
+    // Âm thanh vỗ cánh
+    SoundBuffer wingBuffer;
+    if (!wingBuffer.loadFromFile("sfx_wing.wav")) {
+    std::cout << "Khong the load sfx_wing.wav\n";
+    return -1;
+    }
+    Sound wingSound;
+    wingSound.setBuffer(wingBuffer);
     
+    // Âm thanh va chạm ống/đất
+    SoundBuffer hitBuffer;
+    if (!hitBuffer.loadFromFile("sfx_hit.wav")) {
+    std::cout << "Khong the load sfx_hit.wav\n";
+    return -1;
+    }
+    Sound hitSound;
+    hitSound.setBuffer(hitBuffer);
+
+    SoundBuffer dieBuffer;
+    if (!dieBuffer.loadFromFile("sfx_die.wav")) {
+    std::cout << "Khong the load sfx_die.wav\n";
+    return -1;
+    }
+    Sound dieSound;
+    dieSound.setBuffer(dieBuffer);
 
 ////////////////////////////////////////////////////////////////// END SETUP /////////////////////////////////////////////////////////////////
 
@@ -367,6 +411,7 @@ int main() {
             }
         
             if (event.type == Event::KeyPressed && event.key.code == Keyboard::Space) { // nếu sự kiện là phím Space được nhấn
+                wingSound.play(); // phát âm thanh vỗ cánh
                 if(gameOver) {
                     // Reset game khi ở màn hình game over
                     resetGame(bird, pipesTop, pipesBottom, score, scoreText, scored,
@@ -447,6 +492,8 @@ int main() {
                     bird.setPosition(bird.getPosition().x,
                                      bgSize.y - groundHeight - birdFrameHeight);
                     //std::cout << "Game Over! Chim da cham dat.\n";
+                    hitSound.play();   // va chạm
+                    dieSound.play();   // sau đó chết
                     gameOver = true;
                     finalScoreText.setString(to_string(score));
                     finalScoreText.setPosition(bgSize.x/2 - finalScoreText.getLocalBounds().width/2+190, bgSize.y/2 - 110);
@@ -470,6 +517,8 @@ int main() {
                 for (int i = 0; i < numPipes; i++) {
                     if (bird.getGlobalBounds().intersects(pipesTop[i].getGlobalBounds()) ||
                     bird.getGlobalBounds().intersects(pipesBottom[i].getGlobalBounds())) {
+                        hitSound.play();
+                        dieSound.play();
                     // xử lý thua game
                     gameOver = true;
                     finalScoreText.setString(to_string(score));
@@ -608,7 +657,8 @@ int main() {
             window.draw(scoreText); // vẽ điểm số khi game đã bắt đầu
         } else {
             window.draw(titleSprite); // vẽ tên game khi chưa bắt đầu game
-            window.draw(startText); // vẽ text bắt đầu khi chưa bắt đầu game
+            //window.draw(startText); // vẽ text bắt đầu khi chưa bắt đầu game
+            window.draw(startSprite); // vẽ nút bắt đầu khi chưa bắt đầu game
         }
         
         if (!gameOver) {
