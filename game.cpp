@@ -8,7 +8,78 @@ using namespace sf;
 using namespace std;
 const int numPipes = 3;       // số lượng cặp ống
 const int pipeSpacing = 400;  // khoảng cách ngang giữa các ống
-vector<bool> pipeScored(numPipes, false);
+vector<bool> pipeScored(numPipes, false); // mảng cờ đánh dấu đã cộng điểm qua ống
+const string mapNames[] = { "CLASSIC", "XMAS", "OCEAN", "NIGHT", "MINECRAFT", "HALLOWEEN" };
+const int numMaps = 6;
+enum MapType { DEFAULT, XMAS, OCEAN, NIGHT, MINECRAFT, HALLOWEEN };
+MapType currentMap = DEFAULT;
+void loadMapAssets(
+    MapType map,
+    Texture& backgroundTexture, Texture& pipeTexture, Texture& groundTexture, Texture& birdTexture,Texture& startTexture,   
+    string& mapName
+) {
+    string folder, bg, pipe, ground, bird,start;
+    switch (map) {
+        case XMAS:
+            folder = "xmas/";
+            mapName = "XMAS";
+            bg = "background-xmas.png";
+            pipe = "pipe-xmas.png";
+            ground = "ground-xmas.png";
+            bird = "bird-xmas.png";
+            start = "message-xmas.png";
+            break;
+        case OCEAN:
+            folder = "ocean/";
+            mapName = "OCEAN";
+            bg = "background-fish.png";
+            pipe = "pipe-fish.png";
+            ground = "ground-fish.png";
+            bird = "bird-fish.png";
+            start = "message-fish.png";
+            break;
+        case NIGHT:
+            folder = "night/";
+            mapName = "NIGHT";
+            bg = "background-night.png";
+            pipe = "pipe-night.png";
+            ground = "ground-night.png";
+            bird = "bird-night.png";
+            start = "message-night.png";
+            break;
+        case MINECRAFT:
+            folder = "minecraft/";
+            mapName = "MINECRAFT";
+            bg = "background-craft.png";
+            pipe = "pipe-craft.png";
+            ground = "ground-craft.png";
+            bird = "bird-craft.png";
+            start = "message-craft.png";
+            break;
+        case HALLOWEEN:
+            folder = "halloween/";
+            mapName = "HALLOWEEN";
+            bg = "background-halloween.png";
+            pipe = "pipe-halloween.png";
+            ground = "ground-halloween.png";
+            bird = "bird-halloween.png";
+            start = "message-halloween.png";
+            break;
+        default:
+            folder = "";
+            mapName = "CLASSIC";
+            bg = "nen.png";
+            pipe = "ong.png";
+            ground = "dat.png";
+            bird = "chim.png";
+            start = "xuatphatgame.png";
+    }
+    backgroundTexture.loadFromFile(folder + bg);
+    pipeTexture.loadFromFile(folder + pipe);
+    groundTexture.loadFromFile(folder + ground);
+    birdTexture.loadFromFile(folder + bird);
+    startTexture.loadFromFile(folder + start);
+}
 // Hàm reset game về trạng thái ban đầu
 void resetGame(Sprite& bird,
                vector<Sprite>& pipesTop, vector<Sprite>& pipesBottom,
@@ -129,7 +200,7 @@ void updateMedal(int score, Texture &medalTexture, Sprite &medalSprite, Vector2u
 
 int main() {
     srand(time(nullptr)); // Khởi tạo random seed
-    
+    string mapName = "CLASSIC";
 ///////////////////////////////////////////////////////////////////SETUP/////////////////////////////////////////////////////////////////
     // Tạo nền :>>
     Texture backgroundTexture; // tạo texture cho nền
@@ -238,8 +309,8 @@ int main() {
 
     // Khởi tạo cho di chuyển của chim
     float birdSpeed = 0.0f; // vận tốc ban đầu của chim
-    float gravity = 0.25f; // trọng lực tác động lên chim
-    float jumpStrength = -6.5f; // sức mạnh nhảy của chim
+    float gravity = 0.2f; // trọng lực tác động lên chim
+    float jumpStrength = -5.0f; // sức mạnh nhảy của chim
     float birdAngle = 0.0f;
     float rotationSpeed = 2.5f;
     
@@ -351,10 +422,19 @@ int main() {
     bestScoreText.setString("0");
     bestScoreText.setPosition(bgSize.x/2+180, bgSize.y/2 - 20);
 
-    // Medal / Rank sprite
+    // Medal / Rank sprit
+    
     Texture medalTexture;
     Sprite medalSprite;
     medalSprite.setScale(1.f, 1.f);
+ 
+    loadMapAssets(currentMap, backgroundTexture, pipeTexture, groundTexture, birdTexture,startTexture, mapName);
+    Text mapText;
+    mapText.setFont(font);
+    mapText.setCharacterSize(24);
+    mapText.setFillColor(Color::Yellow);
+    mapText.setString(mapName);
+    mapText.setPosition(10, 10);
 
 
     float idleTime = 0.0f;       // thời gian trôi qua khi chưa bắt đầu game
@@ -430,6 +510,25 @@ int main() {
                 } else {
                     birdSpeed = jumpStrength; // đặt vận tốc của chim bằng sức mạnh nhảy
                     birdAngle = -25.0f; // nghiêng chim lên khi nhảy
+                }
+            }
+             if (!gameStarted && !gameOver) {
+                if (event.type == Event::KeyPressed) {
+                if (event.key.code == Keyboard::Num1) currentMap = DEFAULT;
+                if (event.key.code == Keyboard::Num2) currentMap = XMAS;
+                if (event.key.code == Keyboard::Num3) currentMap = OCEAN;
+                if (event.key.code == Keyboard::Num4) currentMap = NIGHT;
+                if (event.key.code == Keyboard::Num5) currentMap = MINECRAFT;
+                if (event.key.code == Keyboard::Num6) currentMap = HALLOWEEN;
+                // Sau khi đổi map, load lại asset
+                loadMapAssets(currentMap, backgroundTexture, pipeTexture, groundTexture, birdTexture, startTexture, mapName);
+                // Cập nhật lại sprite các đối tượng nếu cần
+                background.setTexture(backgroundTexture);
+                startSprite.setTexture(startTexture, true);
+                // Nếu muốn căn lại vị trí, hãy cập nhật lại vị trí startSprite nếu cần
+                FloatRect startBounds = startSprite.getGlobalBounds();
+                startSprite.setPosition(bgSize.x/2 - startBounds.width/2, bgSize.y/2 - 150);
+                // ... cập nhật lại các sprite khác tương tự
                 }
             }
             
@@ -656,8 +755,23 @@ int main() {
         } else if (gameStarted) {
             window.draw(scoreText); // vẽ điểm số khi game đã bắt đầu
         } else {
+             for (int i = 0; i < numMaps; ++i) {
+             Text menuText;
+             menuText.setFont(font);
+             menuText.setCharacterSize(32);
+             menuText.setFillColor(i == currentMap ? Color::Yellow : Color::White);
+             menuText.setString(to_string(i+1) + ". " + mapNames[i]);
+             menuText.setPosition(40, 60 + i * 40);
+             window.draw(menuText);
+            }   
+            Text guideText;
+            guideText.setFont(font);
+            guideText.setCharacterSize(20);
+            guideText.setFillColor(Color::Cyan);
+            guideText.setString("Nhan phim 1-6 de chon map");
+            guideText.setPosition(40, 60 + numMaps * 40 + 10);
+            window.draw(guideText);
             window.draw(titleSprite); // vẽ tên game khi chưa bắt đầu game
-            //window.draw(startText); // vẽ text bắt đầu khi chưa bắt đầu game
             window.draw(startSprite); // vẽ nút bắt đầu khi chưa bắt đầu game
         }
         
