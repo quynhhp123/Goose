@@ -658,24 +658,29 @@ int main() {
         } else if (gameStarted) {
             window.draw(scoreText); // vẽ điểm số khi game đã bắt đầu
         } else { // Màn hình chờ
-             for (int i = 0; i < numMaps; ++i) { // hiển thị menu chọn map
-             Text menuText; // tạo text để hiển thị menu
-             menuText.setFont(font); // gán font cho text
-             menuText.setCharacterSize(32); // kích thước chữ
-             menuText.setFillColor(i == currentMap ? Color::Yellow : Color::White); // màu chữ vàng nếu là map hiện tại, trắng nếu không
-             menuText.setString(to_string(i+1) + ". " + mapNames[i]); // khởi tạo tên bản đồ
-             menuText.setPosition(40, 60 + i * 40); // đặt vị trí ở góc trên bên trái, cách nhau 40px
-             window.draw(menuText);// vẽ menu chọn map
-            }   
-            Text guideText; //  tạo text để hiển thị hướng dẫn
-            guideText.setFont(font); // gán font cho text 
-            guideText.setCharacterSize(20); // kích thước chữ
-            guideText.setFillColor(Color::Cyan); // màu chữ xanh dương
-            guideText.setString("Nhan phim 1-6 de chon map"); // khởi tạo hướng dẫn
-            guideText.setPosition(40, 60 + numMaps * 40 + 10); // đặt vị trí dưới cùng của menu chọn map
-            window.draw(guideText); //  vẽ hướng dẫn
-            window.draw(titleSprite); // vẽ tên game khi chưa bắt đầu game
-            window.draw(startSprite); // vẽ nút bắt đầu khi chưa bắt đầu game
+             float menuStartX = 40;
+            float menuStartY = bgSize.y - (numMaps * 40) - 150; // 40 là khoảng cách giữa các dòng, 120 là khoảng cách lên trên một chút
+
+            for (int i = 0; i < numMaps; ++i) {
+            Text menuText;
+            menuText.setFont(font);
+            menuText.setCharacterSize(18);
+            menuText.setFillColor(i == currentMap ? Color::Yellow : Color::Black);
+            menuText.setString(to_string(i+1) + ". " + mapNames[i]);
+            menuText.setPosition(menuStartX, menuStartY + i * 40); // vẽ từ dưới lên
+            window.draw(menuText);
+        }
+
+        Text guideText;
+        guideText.setFont(font);
+        guideText.setCharacterSize(20);
+        guideText.setFillColor(Color::Red);
+        guideText.setString("Nhan phim 1-6 de chon map");
+        guideText.setPosition(menuStartX, menuStartY + numMaps * 40 + 10); // dưới cùng của menu
+        window.draw(guideText);
+
+        window.draw(titleSprite);
+        window.draw(startSprite);
         }
         
         if (!gameOver) {
