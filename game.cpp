@@ -6,23 +6,23 @@
 #include <iostream>
 using namespace sf;  // sử dụng thư viện SFML
 using namespace std; // sử dụng thư viện chuẩn
-const int numPipes = 3;       // số lượng cặp ống
-const int pipeSpacing = 400;  // khoảng cách ngang giữa các ống
-vector<bool> pipeScored(numPipes, false); // mảng cờ đánh dấu đã cộng điểm qua ống
-const string mapNames[] = { "CLASSIC", "XMAS", "OCEAN", "NIGHT", "MINECRAFT", "HALLOWEEN" }; // tên các bản đồ
+const int so_ong = 3;       // số lượng cặp ống
+const int khoangcach_x = 400;  // khoảng cách ngang giữa các ống
+vector<bool> diem_ong(so_ong, false); // mảng cờ đánh dấu đã cộng điểm qua ống
+const string ten_maps[] = { "CLASSIC", "XMAS", "OCEAN", "NIGHT", "MINECRAFT", "HALLOWEEN" }; // tên các bản đồ
 const int numMaps = 6; // số lượng bản đồ
 enum MapType { DEFAULT, XMAS, OCEAN, NIGHT, MINECRAFT, HALLOWEEN };  // kiểu liệt kê cho các bản đồ
 MapType currentMap = DEFAULT; // bản đồ hiện tại
 void loadMapAssets( // Hàm tải tài nguyên theo bản đồ
     MapType map,  // loại bản đồ
     Texture& backgroundTexture, Texture& pipeTexture, Texture& groundTexture, Texture& birdTexture,Texture& startTexture, // tham chiếu đến các texture để tải
-    string& mapName // tham chiếu đến tên bản đồ để cập nhật
+    string& ten_map // tham chiếu đến tên bản đồ để cập nhật
 ) {
     string folder, bg, pipe, ground, bird,start; // các biến để lưu tên thư mục và tên file hình ảnh
     switch (map) { // chọn theo loại bản đồ
         case XMAS: // nếu là bản đồ Giáng Sinh
             folder = "xmas/"; // thư mục chứa tài nguyên bản đồ Giáng Sinh
-            mapName = "XMAS"; // cập nhật tên bản đồ
+            ten_map = "XMAS"; // cập nhật tên bản đồ
             bg = "background-xmas.png"; // tên file nền
             pipe = "pipe-xmas.png"; // tên file ống 
             ground = "ground-xmas.png"; // tên file đất
@@ -31,7 +31,7 @@ void loadMapAssets( // Hàm tải tài nguyên theo bản đồ
             break; // kết thúc case
         case OCEAN: // nếu là bản đồ Đại Dương
             folder = "ocean/"; // thư mục chứa tài nguyên bản đồ Đại Dương
-            mapName = "OCEAN"; // cập nhật tên bản đồ
+            ten_map = "OCEAN"; // cập nhật tên bản đồ
             bg = "background-fish.png"; // tên file nền
             pipe = "pipe-fish.png"; // tên file ống
             ground = "ground-fish.png"; // tên file đất
@@ -40,7 +40,7 @@ void loadMapAssets( // Hàm tải tài nguyên theo bản đồ
             break; // kết thúc case
         case NIGHT: // nếu là bản đồ Ban Đêm
             folder = "night/"; // thư mục chứa tài nguyên bản đồ Ban Đêm
-            mapName = "NIGHT"; // cập nhật tên bản đồ
+            ten_map = "NIGHT"; // cập nhật tên bản đồ
             bg = "background-night.png"; // tên file nền
             pipe = "pipe-night.png"; // tên file ống  
             ground = "ground-night.png"; // tên file đất
@@ -49,7 +49,7 @@ void loadMapAssets( // Hàm tải tài nguyên theo bản đồ
             break; // kết thúc case
         case MINECRAFT: // nếu là bản đồ Minecraft
             folder = "minecraft/"; // thư mục chứa tài nguyên bản đồ Minecraft
-            mapName = "MINECRAFT"; // cập nhật tên bản đồ
+            ten_map = "MINECRAFT"; // cập nhật tên bản đồ
             bg = "background-craft.png"; // tên file nền
             pipe = "pipe-craft.png"; // tên file ống
             ground = "ground-craft.png"; // tên file đất
@@ -58,7 +58,7 @@ void loadMapAssets( // Hàm tải tài nguyên theo bản đồ
             break; // kết thúc case
         case HALLOWEEN: // nếu là bản đồ Halloween
             folder = "halloween/"; // thư mục chứa tài nguyên bản đồ Halloween
-            mapName = "HALLOWEEN"; // cập nhật tên bản đồ
+            ten_map = "HALLOWEEN"; // cập nhật tên bản đồ
             bg = "background-halloween.png"; // tên file nền
             pipe = "pipe-halloween.png"; // tên file ống
             ground = "ground-halloween.png"; // tên file đất
@@ -67,7 +67,7 @@ void loadMapAssets( // Hàm tải tài nguyên theo bản đồ
             break; // kết thúc case
         default: // nếu không phải các bản đồ trên, mặc định là bản đồ CLASSIC
             folder = ""; // thư mục gốc
-            mapName = "CLASSIC"; // cập nhật tên bản đồ
+            ten_map = "CLASSIC"; // cập nhật tên bản đồ
             bg = "nen.png"; // tên file nền
             pipe = "ong.png"; // tên file ống
             ground = "dat.png"; // tên file đất
@@ -81,12 +81,12 @@ void loadMapAssets( // Hàm tải tài nguyên theo bản đồ
     startTexture.loadFromFile(folder + start); // tải hình ảnh thông điệp bắt đầu từ file
 } // kết thúc hàm loadMapAssets
 void resetGame(Sprite& bird, // Hàm reset game về trạng thái ban đầu
-               vector<Sprite>& pipesTop, vector<Sprite>& pipesBottom,
+               vector<Sprite>& ong_tren, vector<Sprite>& ong_duoi,
                int& score, Text& scoreText,
                bool& scored, bool& gameStarted, bool& gameOver,
                float& birdSpeed, float& birdAngle,
                Vector2u bgSize, int groundHeight,
-               int pipeWidth, int pipeSpacing, int khoangcach,
+               int pipeWidth, int khoangcach_x, int khoangcach,
                int birdFrameWidth, int birdFrameHeight) 
 {
     // Reset bird
@@ -96,17 +96,17 @@ void resetGame(Sprite& bird, // Hàm reset game về trạng thái ban đầu
     birdAngle = 0.0f; // góc nghiêng ban đầu của chim
     bird.setRotation(0); // đặt góc quay về 0
 
-    for (int i = 0; i < numPipes; i++) { // reset cờ điểm cho tất cả ống
-    pipeScored[i] = false; // reset lại cờ tính điểm
+    for (int i = 0; i < so_ong; i++) { // reset cờ điểm cho tất cả ống
+    diem_ong[i] = false; // reset lại cờ tính điểm
     }
     // Reset pipes
-    for (int i = 0; i < (int)pipesTop.size(); i++) { // đặt lại vị trí các ống
+    for (int i = 0; i < (int)ong_tren.size(); i++) { // đặt lại vị trí các ống
         int minGapY = 100; // khoảng cách tối thiểu từ đỉnh cửa sổ đến khoảng cách giữa ống trên và ống dưới
         int maxGapY = bgSize.y - groundHeight - khoangcach - 100; // khoảng cách tối đa từ đỉnh cửa sổ đến khoảng cách giữa ống trên và ống dưới
         int gapY = minGapY + rand() % (maxGapY - minGapY + 1); // vị trí y ngẫu nhiên của khoảng cách giữa ống trên và ống dưới
 
-        pipesTop[i].setPosition(bgSize.x + i * pipeSpacing, gapY); // vị trí ống trên
-        pipesBottom[i].setPosition(bgSize.x + i * pipeSpacing, gapY + khoangcach); // vị trí ống dưới, cách ống trên một khoảng cách nhất định
+        ong_tren[i].setPosition(bgSize.x + i * khoangcach_x, gapY); // vị trí ống trên
+        ong_duoi[i].setPosition(bgSize.x + i * khoangcach_x, gapY + khoangcach); // vị trí ống dưới, cách ống trên một khoảng cách nhất định
     }
     // Reset score & state
     score = 0; // điểm số ban đầu nó là 0
@@ -119,57 +119,57 @@ void resetGame(Sprite& bird, // Hàm reset game về trạng thái ban đầu
 
 // Hàm cập nhật vị trí và trạng thái của các ống
 void updatePipes( // Hàm cập nhật vị trí và trạng thái của các ống
-    vector<Sprite> &pipesTop, // tham chiếu đến mảng sprite ống trên
-    vector<Sprite> &pipesBottom, // tham chiếu đến mảng sprite ống dưới
-    vector<bool> &pipeScored, // tham chiếu đến mảng cờ đánh dấu đã cộng điểm qua ống
+    vector<Sprite> &ong_tren, // tham chiếu đến mảng sprite ống trên
+    vector<Sprite> &ong_duoi, // tham chiếu đến mảng sprite ống dưới
+    vector<bool> &diem_ong, // tham chiếu đến mảng cờ đánh dấu đã cộng điểm qua ống
     Sprite &bird,
     int &score,
     Text &scoreText,
-    int numPipes,
+    int so_ong,
     int pipeWidth,
-    int pipeSpacing,
+    int khoangcach_x,
     int khoangcach,
     int groundHeight,
     float pipeSpeed,
     Vector2u bgSize, // kích thước nền
     RenderWindow &window // tham chiếu đến cửa sổ để vẽ các ống
 ) {
-    for (int i = 0; i < numPipes; i++) { // lặp qua từng cặp ống
+    for (int i = 0; i < so_ong; i++) { // lặp qua từng cặp ống
         // Di chuyển ống
-        pipesTop[i].move(-pipeSpeed, 0); // di chuyển ống lên bên trái
-        pipesBottom[i].move(-pipeSpeed, 0); // di chuyển ống xuống bên trái
+        ong_tren[i].move(-pipeSpeed, 0); // di chuyển ống lên bên trái
+        ong_duoi[i].move(-pipeSpeed, 0); // di chuyển ống xuống bên trái
 
         // Reset khi ống ra khỏi màn hình
-        if (pipesTop[i].getPosition().x < -pipeWidth) { // nếu ống đã đi hết màn hình bên trái 
+        if (ong_tren[i].getPosition().x < -pipeWidth) { // nếu ống đã đi hết màn hình bên trái 
             int minGapY = 100; // khoảng cách tối thiểu từ đỉnh cửa sổ đến khoảng cách giữa ống trên và ống dưới
             int maxGapY = bgSize.y - groundHeight - khoangcach - 100; // khoảng cách tối đa từ đỉnh cửa sổ đến khoảng cách giữa ống trên và ống dưới
             int newGapY = minGapY + rand() % (maxGapY - minGapY + 1); // vị trí y ngẫu nhiên của khoảng cách giữa ống trên và ống dưới
 
             // tìm ống xa nhất bên phải
             float maxX = 0; // vị trí x lớn nhất hiện tại
-            for (int j = 0; j < numPipes; j++) { // lặp qua từng ống
-                if (pipesTop[j].getPosition().x > maxX) { // nếu vị trí x của ống hiện tại lớn hơn vị trí x lớn nhất
-                    maxX = pipesTop[j].getPosition().x; // cập nhật vị trí x lớn nhất
+            for (int j = 0; j < so_ong; j++) { // lặp qua từng ống
+                if (ong_tren[j].getPosition().x > maxX) { // nếu vị trí x của ống hiện tại lớn hơn vị trí x lớn nhất
+                    maxX = ong_tren[j].getPosition().x; // cập nhật vị trí x lớn nhất
                 } // kết thúc if
             } // kết thúc for
 
-            pipesTop[i].setPosition(maxX + pipeSpacing, newGapY); // đặt lại vị trí ống trên, cách ống xa nhất bên phải một khoảng pipeSpacing
-            pipesBottom[i].setPosition(maxX + pipeSpacing, newGapY + khoangcach); // đặt lại vị trí ống dưới, cách ống trên một khoảng khoangcach
+            ong_tren[i].setPosition(maxX + khoangcach_x, newGapY); // đặt lại vị trí ống trên, cách ống xa nhất bên phải một khoảng khoangcach_x
+            ong_duoi[i].setPosition(maxX + khoangcach_x, newGapY + khoangcach); // đặt lại vị trí ống dưới, cách ống trên một khoảng khoangcach
 
-            pipeScored[i] = false; // reset lại cờ tính điểm
+            diem_ong[i] = false; // reset lại cờ tính điểm
         }
 
         // Tính điểm
-        float pipeX = pipesTop[i].getPosition().x + pipeWidth / 2; // vị trí x của ống (gốc giữa cạnh)
-        if (bird.getPosition().x > pipeX && !pipeScored[i]) { // nếu chim đã vượt qua ống và chưa cộng điểm cho ống này
+        float pipeX = ong_tren[i].getPosition().x + pipeWidth / 2; // vị trí x của ống (gốc giữa cạnh)
+        if (bird.getPosition().x > pipeX && !diem_ong[i]) { // nếu chim đã vượt qua ống và chưa cộng điểm cho ống này
             score++; // tăng điểm
-            pipeScored[i] = true; // đánh dấu đã cộng điểm cho ống này
-            scoreText.setString(std::to_string(score)); // cập nhật lại text điểm số
+            diem_ong[i] = true; // đánh dấu đã cộng điểm cho ống này
+            scoreText.setString(to_string(score)); // cập nhật lại text điểm số
         } // kết thúc if
 
         // Vẽ ống
-        window.draw(pipesTop[i]); // vẽ ống trên
-        window.draw(pipesBottom[i]); // vẽ ống dưới
+        window.draw(ong_tren[i]); // vẽ ống trên
+        window.draw(ong_duoi[i]); // vẽ ống dưới
     }
 }
 
@@ -198,10 +198,9 @@ void updateMedal(int score, Texture &medalTexture, Sprite &medalSprite, Vector2u
 }
 
 
-
 int main() {
     srand(time(nullptr)); // Khởi tạo random seed
-    string mapName = "CLASSIC"; // tên bản đồ hiện tại
+    string ten_map = "CLASSIC"; // tên bản đồ hiện tại
 ///////////////////////////////////////////////////////////////////SETUP/////////////////////////////////////////////////////////////////
     // Tạo nền :>>
     Texture backgroundTexture; // tạo texture cho nền
@@ -248,10 +247,10 @@ int main() {
     //pipeBottom.setPosition(pipeX, gapY + khoangcach); // vị trí ống dưới, cách ống trên một khoảng cách nhất định
 
 
-    vector<Sprite> pipesTop;  // mảng sprite ống trên
-    vector<Sprite> pipesBottom; // mảng sprite ống dưới
+    vector<Sprite> ong_tren;  // mảng sprite ống trên
+    vector<Sprite> ong_duoi; // mảng sprite ống dưới
 
-    for (int i = 0; i < numPipes; i++) { // khởi tạo các cặp ống
+    for (int i = 0; i < so_ong; i++) { // khởi tạo các cặp ống
         Sprite top(pipeTexture); // tạo sprite từ texture ống
         Sprite bottom(pipeTexture); // tạo sprite từ texture ống
 
@@ -264,12 +263,12 @@ int main() {
         int maxGapY = bgSize.y - groundHeight - khoangcach - 100; // khoảng cách tối đa từ đỉnh cửa sổ đến khoảng cách giữa ống trên và ống dưới
         int gapY = minGapY + rand() % (maxGapY - minGapY + 1); // vị trí y ngẫu nhiên của khoảng cách giữa ống trên và ống dưới
 
-        // Mỗi ống cách nhau pipeSpacing
-        top.setPosition(bgSize.x + i * pipeSpacing+200, gapY); // vị trí ống trên
-        bottom.setPosition(bgSize.x + i * pipeSpacing+200, gapY + khoangcach); // vị trí ống dưới, cách ống trên một khoảng cách nhất định
+        // Mỗi ống cách nhau khoangcach_x
+        top.setPosition(bgSize.x + i * khoangcach_x+200, gapY); // vị trí ống trên
+        bottom.setPosition(bgSize.x + i * khoangcach_x+200, gapY + khoangcach); // vị trí ống dưới, cách ống trên một khoảng cách nhất định
 
-        pipesTop.push_back(top); // thêm ống trên vào mảng
-        pipesBottom.push_back(bottom); // thêm ống dưới vào mảng
+        ong_tren.push_back(top); // thêm ống trên vào mảng
+        ong_duoi.push_back(bottom); // thêm ống dưới vào mảng
     }
 
     // Tạo đất 
@@ -343,7 +342,7 @@ int main() {
     //Tạo tên game
     Texture titleTexture; // tạo texture cho title
     if (!titleTexture.loadFromFile("tengame.png")) { // load hình ảnh title
-        std::cout << "Khong the load title.png\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
+        cout << "Khong the load title.png\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
         return -1;
     }
     Sprite titleSprite(titleTexture); // tạo sprite từ texture title
@@ -351,19 +350,10 @@ int main() {
     FloatRect titleBounds = titleSprite.getGlobalBounds(); // lấy kích thước của title
     titleSprite.setPosition(bgSize.x/2 - titleBounds.width/2-20,-300); // đặt vị trí title ở giữa, hơi lên trên
     
-    // Tạo text bắt đầu vào game
-    // Text startText;
-    // startText.setFont(font);
-    // startText.setCharacterSize(40);
-    // startText.setFillColor(Color::White);
-    // startText.setOutlineColor(Color::Black);
-    // startText.setOutlineThickness(3);
-    // startText.setString("Press SPACE to Start");
-    // startText.setPosition(bgSize.x/2 - startText.getLocalBounds().width/2, bgSize.y/2 - 50);
 
     Texture startTexture; // tạo texture cho nút bắt đầu
     if (!startTexture.loadFromFile("xuatphatgame.png")) { // load hình ảnh nút bắt đầu
-        std::cout << "Khong the load start.png\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
+        cout << "Khong the load start.png\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
         return -1;
     }
     Sprite startSprite(startTexture); // tạo sprite từ texture nút bắt đầu 
@@ -374,7 +364,7 @@ int main() {
     // Tạo text Game Over (thay vì load hình)
     Texture gameOverTexture; // tạo texture cho game over
     if (!gameOverTexture.loadFromFile("gameover.png")) { // load hình ảnh game over
-        std::cout << "Khong the load gameover.png\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
+        cout << "Khong the load gameover.png\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
         return -1;
     }
     Sprite gameOverSprite(gameOverTexture); // tạo sprite từ texture game over
@@ -385,7 +375,7 @@ int main() {
     // Load hình ảnh nút Restart
     Texture restartTexture; // tạo texture cho nút restart
     if (!restartTexture.loadFromFile("restart.png")) { // load hình ảnh nút restart
-        std::cout << "Khong the load restart.png\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
+        cout << "Khong the load restart.png\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
         return -1;
     }
     Sprite restartSprite(restartTexture); // tạo sprite từ texture nút restart
@@ -395,7 +385,7 @@ int main() {
     // Tạo text Leaderboard (thay vì load hình)
     Texture leaderTexture; // tạo texture cho bảng xếp hạng
     if (!leaderTexture.loadFromFile("leader.png")) { // load hình ảnh bảng xếp hạng
-        std::cout << "Khong the load leader.png\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
+        cout << "Khong the load leader.png\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
         return -1;
     }
     Sprite leaderSprite(leaderTexture); // tạo sprite từ texture bảng xếp hạng
@@ -429,12 +419,12 @@ int main() {
     Sprite medalSprite; // tạo sprite từ texture huy chương
     medalSprite.setScale(1.f, 1.f); // đặt tỉ lệ cho huy chương
  
-    loadMapAssets(currentMap, backgroundTexture, pipeTexture, groundTexture, birdTexture,startTexture, mapName); // tải tài nguyên theo bản đồ hiện tại
+    loadMapAssets(currentMap, backgroundTexture, pipeTexture, groundTexture, birdTexture,startTexture, ten_map); // tải tài nguyên theo bản đồ hiện tại
     Text mapText; // tạo text để hiển thị tên bản đồ
     mapText.setFont(font); // gán font cho text
     mapText.setCharacterSize(24); // kích thước chữ
     mapText.setFillColor(Color::Yellow); // màu chữ vàng
-    mapText.setString(mapName); // khởi tạo tên bản đồ
+    mapText.setString(ten_map); // khởi tạo tên bản đồ
     mapText.setPosition(10, 10); // đặt vị trí ở góc trên bên trái
 
 
@@ -448,7 +438,7 @@ int main() {
     // Nhạc nền (chạy xuyên suốt game)
     Music backgroundMusic; // tạo biến music cho nhạc nền
     if (!backgroundMusic.openFromFile("wind.mp3")) { // tải nhạc nền từ file
-    std::cout << "Khong the load wind.mp3\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
+    cout << "Khong the load wind.mp3\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
     return -1;
     }
     backgroundMusic.setLoop(true); // lặp lại nhạc nền
@@ -457,7 +447,7 @@ int main() {
     // Âm thanh vỗ cánh
     SoundBuffer wingBuffer; // tạo buffer cho âm thanh vỗ cánh
     if (!wingBuffer.loadFromFile("sfx_wing.wav")) { // tải âm thanh vỗ cánh từ file
-    std::cout << "Khong the load sfx_wing.wav\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
+    cout << "Khong the load sfx_wing.wav\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
     return -1;
     }
     Sound wingSound; // tạo biến sound cho âm thanh vỗ cánh
@@ -466,7 +456,7 @@ int main() {
     // Âm thanh va chạm ống/đất
     SoundBuffer hitBuffer; // tạo buffer cho âm thanh va chạm
     if (!hitBuffer.loadFromFile("sfx_hit.wav")) { // tải âm thanh va chạm từ file
-    std::cout << "Khong the load sfx_hit.wav\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
+    cout << "Khong the load sfx_hit.wav\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
     return -1;
     }
     Sound hitSound; // tạo biến sound cho âm thanh va chạm
@@ -474,7 +464,7 @@ int main() {
 
     SoundBuffer dieBuffer; // tạo buffer cho âm thanh chết
     if (!dieBuffer.loadFromFile("sfx_die.wav")) { // tải âm thanh chết từ file
-    std::cout << "Khong the load sfx_die.wav\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
+    cout << "Khong the load sfx_die.wav\n"; // nếu không tải được, trả về -1 để kết thúc chương trình
     return -1;
     }
     Sound dieSound; // tạo biến sound cho âm thanh chết
@@ -495,14 +485,14 @@ int main() {
                 wingSound.play(); // phát âm thanh vỗ cánh
                 if(gameOver) {
                     // Reset game khi ở màn hình game over
-                    resetGame(bird, pipesTop, pipesBottom, score, scoreText, scored,
+                    resetGame(bird, ong_tren, ong_duoi, score, scoreText, scored,
                               gameStarted, gameOver, birdSpeed, birdAngle,
-                              bgSize, groundHeight, pipeWidth, pipeSpacing, khoangcach,
+                              bgSize, groundHeight, pipeWidth, khoangcach_x, khoangcach,
                               birdFrameWidth, birdFrameHeight);
 
                     if (score > bestScore) {
                                             bestScore = score;
-                                            bestScoreText.setString(std::to_string(bestScore));
+                                            bestScoreText.setString(to_string(bestScore));
                                             }
                 } else if(!gameStarted) {
                     gameStarted = true; // bắt đầu trò chơi
@@ -522,7 +512,7 @@ int main() {
                 if (event.key.code == Keyboard::Num5) currentMap = MINECRAFT;
                 if (event.key.code == Keyboard::Num6) currentMap = HALLOWEEN;
                 // Sau khi đổi map, load lại asset
-                loadMapAssets(currentMap, backgroundTexture, pipeTexture, groundTexture, birdTexture, startTexture, mapName);
+                loadMapAssets(currentMap, backgroundTexture, pipeTexture, groundTexture, birdTexture, startTexture, ten_map);
                 // Cập nhật lại sprite các đối tượng nếu cần
                 background.setTexture(backgroundTexture);
                 startSprite.setTexture(startTexture, true);
@@ -538,9 +528,9 @@ int main() {
                 Vector2i mousePos = Mouse::getPosition(window); // lấy vị trí chuột trong cửa sổ
                 if (gameOver && restartSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) { // nếu đang ở màn hình game over và chuột nhấn vào nút restart
                     // Reset game khi nhấn nút restart
-                    resetGame(bird, pipesTop, pipesBottom, score, scoreText, scored, // gọi hàm resetGame
+                    resetGame(bird, ong_tren, ong_duoi, score, scoreText, scored, // gọi hàm resetGame
                     gameStarted, gameOver, birdSpeed, birdAngle, 
-                    bgSize, groundHeight, pipeWidth, pipeSpacing, khoangcach,
+                    bgSize, groundHeight, pipeWidth, khoangcach_x, khoangcach,
                     birdFrameWidth, birdFrameHeight);
                 }
             }
@@ -592,7 +582,7 @@ int main() {
                 if (bird.getPosition().y >= bgSize.y - groundHeight - birdFrameHeight) { // nếu chim chạm đất
                     bird.setPosition(bird.getPosition().x,
                                      bgSize.y - groundHeight - birdFrameHeight); // đặt vị trí y của chim bằng vị trí y của đất
-                    //std::cout << "Game Over! Chim da cham dat.\n";
+                    //cout << "Game Over! Chim da cham dat.\n";
                     hitSound.play();   // va chạm
                     dieSound.play();   // sau đó chết
                     gameOver = true; // xử lý thua game
@@ -601,13 +591,13 @@ int main() {
                     if (score > bestScore) {
                                             bestScore = score; // cập nhật điểm cao nhất
                                             }
-                    bestScoreText.setString(std::to_string(bestScore)); // hiển thị điểm số cao nhất
+                    bestScoreText.setString(to_string(bestScore)); // hiển thị điểm số cao nhất
                     updateMedal(score, medalTexture, medalSprite,bgSize); // cập nhật huy chương dựa trên điểm số
                 }
 
-                for (int i = 0; i < numPipes; i++) { // kiểm tra va chạm với tất cả các ống
-                    if (bird.getGlobalBounds().intersects(pipesTop[i].getGlobalBounds()) ||
-                    bird.getGlobalBounds().intersects(pipesBottom[i].getGlobalBounds())) { // nếu chim va chạm với ống trên hoặc ống dưới
+                for (int i = 0; i < so_ong; i++) { // kiểm tra va chạm với tất cả các ống
+                    if (bird.getGlobalBounds().intersects(ong_tren[i].getGlobalBounds()) ||
+                    bird.getGlobalBounds().intersects(ong_duoi[i].getGlobalBounds())) { // nếu chim va chạm với ống trên hoặc ống dưới
                         hitSound.play(); // va chạm
                         dieSound.play(); // sau đó chết
                     // xử lý thua game
@@ -617,7 +607,7 @@ int main() {
                     if (score > bestScore) {
                                             bestScore = score; // cập nhật điểm cao nhất
                                             }
-                    bestScoreText.setString(std::to_string(bestScore));
+                    bestScoreText.setString(to_string(bestScore));
                     // Cập nhật huy chương nếu có
                     updateMedal(score, medalTexture, medalSprite,bgSize); // cập nhật huy chương dựa trên điểm số
                     }
@@ -625,9 +615,9 @@ int main() {
 
 
         if (gameStarted && !gameOver) { // nếu game đã bắt đầu và chưa game over
-            updatePipes(pipesTop, pipesBottom, pipeScored,
+            updatePipes(ong_tren, ong_duoi, diem_ong,
                         bird, score, scoreText,
-                        numPipes, pipeWidth, pipeSpacing,
+                        so_ong, pipeWidth, khoangcach_x,
                         khoangcach, groundHeight, pipeSpeed,
                         bgSize, window); // cập nhật ống
                     }
@@ -640,9 +630,9 @@ int main() {
         
         if (gameStarted && !gameOver) {
             // Khi game đã bắt đầu và chưa game over - vẽ ống
-            for (int i = 0; i < numPipes; i++) {
-            window.draw(pipesTop[i]);// vẽ ống
-            window.draw(pipesBottom[i]); // vẽ ống
+            for (int i = 0; i < so_ong; i++) {
+            window.draw(ong_tren[i]);// vẽ ống
+            window.draw(ong_duoi[i]); // vẽ ống
             }
         }
         for (int i = 0; i < numGround; ++i)
@@ -666,7 +656,7 @@ int main() {
             menuText.setFont(font);
             menuText.setCharacterSize(18);
             menuText.setFillColor(i == currentMap ? Color::Yellow : Color::Black);
-            menuText.setString(to_string(i+1) + ". " + mapNames[i]);
+            menuText.setString(to_string(i+1) + ". " + ten_maps[i]);
             menuText.setPosition(menuStartX, menuStartY + i * 40); // vẽ từ dưới lên
             window.draw(menuText);
         }
